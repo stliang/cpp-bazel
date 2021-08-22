@@ -24,5 +24,7 @@ steps:
   args: ['run', 'bazel:target']
 
 # TODO(mattmoor): Test docker_push as well.
+# TODO Docker push to GCR
+# TODO Docker push to Artifact registry
 
 images: ['gcr.io/$PROJECT_ID/bazel']
