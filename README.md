@@ -1,88 +1,30 @@
-# Bazel
+# Stage 1
 
-The `gcr.io/cloud-builders/bazel` image is maintained by the Cloud Build team,
-but it may not support the most recent features or versions of Bazel. We also do
-not provide historical pinned versions of bazel.
+This showcases how to build a single file to create a runnable application.
 
-The Bazel team provides a `bazel` image that supports multiple tagged versions
-at http://gcr.io/cloud-marketplace-containers/google/bazel.
-
-To migrate to the Bazel team's official Bazel image, make the following changes
-to your `cloudbuild.yaml`:
+This BUILD file shows that we want to build a C++ binary using the ```cc_binary``` rule provided by Bazel.
+In the ```cc_binary``` rule, name of the binary is specified in ```name``` attribute (in this example, it's ```hello-world```), required source files to be built are provided in ```srcs``` attribute.
 
 ```
-- name: 'gcr.io/cloud-builders/bazel'
-+ name: 'gcr.io/cloud-marketplace-containers/google/bazel'
-+ entrypoint: 'bazel'
-```
-
-## Example Usage
-
-```
-steps:
-- name: 'gcr.io/cloud-marketplace-containers/google/bazel'
-  entrypoint: 'bazel'
-  args: ['build', '//java/com/company/service:server']
-```
-
----
-
-## Usage Details
-
-This is a tool builder to simply invoke [`bazel`](https://bazel.io) commands.
-
-Arguments passed to this builder will be passed to `bazel` directly.
-
-The latest available version of `bazel` is used.
-
-## Examples
-
-The following examples demonstrate build request that use this builder:
-
-### Build a target
-
-This `cloudbuild.yaml` simply builds a target. It might be a binary, a library,
-a test target, or any other buildable target.
-
-```
-steps:
-- name: gcr.io/cloud-builders/bazel
-  args: ['build', '//java/com/company/service:server']
-```
-
-# Build and push a container image
-
-If the rule is a [`docker_build`](https://bazel.build/versions/master/docs/be/docker.html#docker_build)
-target, then you can `bazel run` the target to build a Docker image and load
-it into the Docker daemon.  You can then tag the resulting image so it can be
-pushed to the Container Registry.
-
-`path/to/some/BUILD` file:
-
-```
-docker_build(
-  name = "docker_target",
-  base = "@docker_debian//:wheezy",
-  entrypoint = ["echo", "foo"],
+cc_binary(
+    name = "hello-world",
+    srcs = ["hello-world.cc"],
 )
 ```
 
-This `docker_build` rule produces a Docker container image based on debian that
-specifies "echo foo" as its `ENTRYPOINT`.
-
-See https://bazel.build/versions/master/docs/be/docker.html for more options.
-
-`cloudbuild.yaml`:
-
+To build this example you use
 ```
-steps:
-# Build the Docker image and load it into the Docker daemon.
-# The loaded image name is the BUILD target's name, prefixed with bazel/.
-- name: gcr.io/cloud-builders/bazel
-  args: ['run', '//path/to/some:docker_target']
-# Re-tag the image to something in your project's gcr.io repository.
-- name: gcr.io/cloud-builders/docker
-  args: ['tag', 'bazel/path/to/some:docker_target', 'gcr.io/$PROJECT_ID/server']
-# Push the image.
-images: ['gcr.io/$PROJECT_ID/server']
+bazel build //main:hello-world
 ```
+
+If the build is successful, Bazel prints the following output:
+```
+____Loading complete.  Analyzing...
+____Found 1 target...
+____Building...
+Target //main:hello-world up-to-date:
+  C:/tools/msys64/tmp/_bazel_woden/vqeu6v3v/execroot/__main__/bazel-out/msvc_x64-fastbuild/bin/main/hello-world.exe
+____Elapsed time: 0,400s, Critical Path: 0,01s
+```
+
+In the run log above you can see where the executable was built so you can locate it and use it.
